@@ -4,10 +4,316 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aura Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Bebas Neue', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: auto;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite alternate;
+        }
+        .container {
+            max-width: 700px;
+            width: 100%;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        .card {
+            background: linear-gradient(145deg, #1e1e2e, #2a2a3e);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 212, 255, 0.3);
+            padding: 40px;
+            text-align: center;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            animation: fadeIn 1s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        h1 {
+            margin-bottom: 40px;
+            font-size: 3em;
+            color: #00d4ff;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from { text-shadow: 0 0 20px rgba(0, 212, 255, 0.8); }
+            to { text-shadow: 0 0 30px rgba(0, 212, 255, 1); }
+        }
+        .slider-group {
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            transition: transform 0.3s ease;
+        }
+        .slider-group:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.2);
+        }
+        .slider-group label {
+            flex: 1;
+            text-align: left;
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #ff6b6b;
+        }
+        .slider-group input[type="range"] {
+            flex: 2;
+            margin: 0 15px;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 10px;
+            background: linear-gradient(90deg, #333 0%, #00d4ff 100%);
+            border-radius: 5px;
+            outline: none;
+            transition: background 0.3s ease;
+        }
+        .slider-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            background: linear-gradient(45deg, #00d4ff, #0099cc);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .slider-group input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+        }
+        .slider-group .value {
+            flex: 0.5;
+            font-size: 1.3em;
+            color: #00d4ff;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+        button {
+            background: linear-gradient(45deg, #00d4ff, #0099cc);
+            color: #121212;
+            border: none;
+            padding: 18px 40px;
+            font-size: 1.3em;
+            font-weight: bold;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+            margin-top: 30px;
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+        }
+        button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 25px rgba(0, 212, 255, 0.6);
+            background: linear-gradient(45deg, #0099cc, #0077aa);
+        }
+        .results {
+            margin-top: 40px;
+            display: none;
+            animation: slideIn 0.8s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .results h2 {
+            font-size: 2.2em;
+            margin-bottom: 15px;
+            color: #ff6b6b;
+            text-shadow: 0 0 15px rgba(255, 107, 107, 0.5);
+        }
+        .results .score {
+            font-size: 4em;
+            color: #00d4ff;
+            margin-bottom: 15px;
+            text-shadow: 0 0 25px rgba(0, 212, 255, 0.8);
+            animation: bounce 1s ease-out;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        .results .title {
+            font-size: 1.8em;
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            text-shadow: 0 0 15px rgba(255, 107, 107, 0.5);
+        }
+        .results .message {
+            font-size: 1.3em;
+            margin-bottom: 25px;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+        .hidden-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .hidden-stats div {
+            text-align: center;
+            flex: 1;
+        }
+        .hidden-stats .stat-label {
+            font-size: 1em;
+            color: #ff6b6b;
+            margin-bottom: 5px;
+        }
+        .hidden-stats .stat-value {
+            font-size: 2em;
+            color: #00d4ff;
+            text-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to the Aura Calculator</h1>
-    <p>Calculate your aura using our tool!</p>
-    <!-- Add calculator functionality here -->
+    <div class="container">
+        <div class="card">
+            <h1>Aura Calculator</h1>
+            <div class="slider-group">
+                <label for="looks">Looks</label>
+                <input type="range" id="looks" min="0" max="100" value="50">
+                <span class="value" id="looks-value">50</span>
+            </div>
+            <div class="slider-group">
+                <label for="rizz">Rizz</label>
+                <input type="range" id="rizz" min="0" max="100" value="50">
+                <span class="value" id="rizz-value">50</span>
+            </div>
+            <div class="slider-group">
+                <label for="iq">IQ</label>
+                <input type="range" id="iq" min="0" max="100" value="50">
+                <span class="value" id="iq-value">50</span>
+            </div>
+            <div class="slider-group">
+                <label for="fitness">Fitness</label>
+                <input type="range" id="fitness" min="0" max="100" value="50">
+                <span class="value" id="fitness-value">50</span>
+            </div>
+            <div class="slider-group">
+                <label for="respect">Respect</label>
+                <input type="range" id="respect" min="0" max="100" value="50">
+                <span class="value" id="respect-value">50</span>
+            </div>
+            <div class="slider-group">
+                <label for="toxicity">Toxicity</label>
+                <input type="range" id="toxicity" min="0" max="100" value="50">
+                <span class="value" id="toxicity-value">50</span>
+            </div>
+            <button id="calculate">Calculate Aura</button>
+            <div class="results" id="results">
+                <h2>Your Aura Score</h2>
+                <div class="score" id="aura-score">0</div>
+                <div class="title" id="aura-title">L aura</div>
+                <div class="message" id="aura-message">Even NPCs skip your dialogue option 🎮 💀</div>
+                <div class="hidden-stats">
+                    <div>
+                        <div class="stat-label">Charm Level</div>
+                        <div class="stat-value" id="charm-level">0</div>
+                    </div>
+                    <div>
+                        <div class="stat-label">Brain Level</div>
+                        <div class="stat-value" id="brain-level">0</div>
+                    </div>
+                    <div>
+                        <div class="stat-label">Presence</div>
+                        <div class="stat-value" id="presence">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Update slider values in real-time
+        const sliders = ['looks', 'rizz', 'iq', 'fitness', 'respect', 'toxicity'];
+        sliders.forEach(stat => {
+            const slider = document.getElementById(stat);
+            const valueDisplay = document.getElementById(stat + '-value');
+            slider.addEventListener('input', () => {
+                valueDisplay.textContent = slider.value;
+            });
+        });
+
+        // Calculate button
+        document.getElementById('calculate').addEventListener('click', () => {
+            const looks = parseInt(document.getElementById('looks').value);
+            const rizz = parseInt(document.getElementById('rizz').value);
+            const iq = parseInt(document.getElementById('iq').value);
+            const fitness = parseInt(document.getElementById('fitness').value);
+            const respect = parseInt(document.getElementById('respect').value);
+            const toxicity = parseInt(document.getElementById('toxicity').value);
+
+            // Base Aura Score
+            let auraScore = (looks * 1.2 + rizz * 1.3 + iq * 1.0 + fitness * 0.9 + respect * 1.2 - toxicity * 1.3) / 5.6;
+
+            // Bonuses
+            if (looks > 80 && rizz > 80) auraScore += 5;
+            if (respect > 85) auraScore += 5;
+            if (toxicity > 70) auraScore -= 10;
+
+            // Round to whole number
+            auraScore = Math.round(auraScore);
+
+            // Determine title
+            let title;
+            if (auraScore <= 30) title = "L aura";
+            else if (auraScore <= 50) title = "Npc";
+            else if (auraScore <= 70) title = "chigma";
+            else if (auraScore <= 85) title = "Alpha Aura";
+            else if (auraScore <= 95) title = "Legendary";
+            else title = "Sigma";
+
+            // Determine message
+            let message;
+            if (auraScore < 40) message = "Even NPCs skip your dialogue option 🎮 💀";
+            else if (auraScore <= 70) message = "You exist… but the universe hasn’t decided why yet 😐";
+            else message = "Y-Your aura makes people question their life choices 😈";
+
+            // Hidden stats
+            const charmLevel = Math.round((looks + rizz) / 2);
+            const brainLevel = iq;
+            const presence = Math.round((fitness + respect) / 2);
+
+            // Update display
+            document.getElementById('aura-score').textContent = auraScore;
+            document.getElementById('aura-title').textContent = title;
+            document.getElementById('aura-message').textContent = message;
+            document.getElementById('charm-level').textContent = charmLevel;
+            document.getElementById('brain-level').textContent = brainLevel;
+            document.getElementById('presence').textContent = presence;
+
+            // Show results with animation
+            const results = document.getElementById('results');
+            results.style.display = 'block';
+            results.style.animation = 'slideIn 0.8s ease-out';
+        });
+    </script>
 </body>
 </html>
